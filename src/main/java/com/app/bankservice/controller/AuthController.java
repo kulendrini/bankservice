@@ -1,8 +1,10 @@
 package com.app.bankservice.controller;
 
+import com.app.bankservice.entity.User;
 import com.app.bankservice.model.JwtRequest;
 import com.app.bankservice.model.JwtResponse;
 import com.app.bankservice.model.UserDTO;
+import com.app.bankservice.model.UserResponseDTO;
 import com.app.bankservice.security.jwt.JwtTokenUtil;
 import com.app.bankservice.service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
@@ -37,13 +36,16 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
+        final long expiresIn = jwtTokenUtil.getExpirationDateFromToken(token).getTime() - System.currentTimeMillis();
 
-        return ResponseEntity.ok(new JwtResponse(token));
+        return ResponseEntity.ok(new JwtResponse(token, expiresIn / 1000)); // expiresIn in seconds
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> saveUser(@RequestBody UserDTO user) throws Exception {
-        return ResponseEntity.ok(userDetailsService.save(user));
+        User savedUser = userDetailsService.save(user);
+        UserResponseDTO responseDTO = UserResponseDTO.fromUser(savedUser);
+        return ResponseEntity.ok(responseDTO);
     }
 
     private void authenticate(String username, String password) throws Exception {
