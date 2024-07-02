@@ -20,16 +20,26 @@ public class Loan {
     @Temporal(TemporalType.DATE)
     private Date startDate;
 
+    @ManyToOne
+    @JoinColumn(name = "loan_type_id")
+    private LoanType loanType;
+
+    @ManyToOne
+    @JoinColumn(name = "loan_payment_type_id")
+    private LoanPaymentType loanPaymentType;
+
     public Loan() {
     }
 
-    public Loan(Long loanId, Double amount, Double interestRate, Integer durationYears, String status, Date startDate) {
+    public Loan(Long loanId, Double amount, Double interestRate, Integer durationYears, String status, Date startDate, LoanType loanType, LoanPaymentType loanPaymentType) {
         this.loanId = loanId;
         this.amount = amount;
         this.interestRate = interestRate;
         this.durationYears = durationYears;
         this.status = status;
         this.startDate = startDate;
+        this.loanType = loanType;
+        this.loanPaymentType = loanPaymentType;
     }
 
     public Long getLoanId() {
@@ -80,6 +90,22 @@ public class Loan {
         this.startDate = startDate;
     }
 
+    public LoanType getLoanType() {
+        return loanType;
+    }
+
+    public void setLoanType(LoanType loanType) {
+        this.loanType = loanType;
+    }
+
+    public LoanPaymentType getLoanPaymentType() {
+        return loanPaymentType;
+    }
+
+    public void setLoanPaymentType(LoanPaymentType loanPaymentType) {
+        this.loanPaymentType = loanPaymentType;
+    }
+
     @Override
     public String toString() {
         return "Loan{" +
@@ -89,19 +115,11 @@ public class Loan {
                 ", durationYears=" + durationYears +
                 ", status='" + status + '\'' +
                 ", startDate=" + startDate +
+                ", loanType=" + loanType +
+                ", loanPaymentType=" + loanPaymentType +
                 '}';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Loan loan = (Loan) o;
-        return Objects.equals(loanId, loan.loanId) && Objects.equals(amount, loan.amount) && Objects.equals(interestRate, loan.interestRate) && Objects.equals(durationYears, loan.durationYears) && Objects.equals(status, loan.status) && Objects.equals(startDate, loan.startDate);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(loanId, amount, interestRate, durationYears, status, startDate);
-    }
+
 }
