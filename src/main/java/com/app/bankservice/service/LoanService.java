@@ -26,7 +26,21 @@ public class LoanService {
     }
 
 
-
+    /**
+     * Retrieves loan details for a given username.
+     * <p>
+     * This method fetches the {@link User} by the specified username and retrieves all associated loans. It processes the loans to create a list of {@link LoanDTO} objects. If the username is null, empty, or if no user or loans are found, appropriate exceptions are thrown.
+     * </p>
+     *
+     * @param username The username of the user whose loan details are to be retrieved. This cannot be null or empty.
+     * @return A {@link LoanResponseDTO} object containing the user's first name, last name, and a list of {@link LoanDTO} objects with loan details.
+     * @throws IllegalArgumentException if the username is null, empty, if no user is found for the given username, or if no loans are associated with the user.
+     * @throws RuntimeException if there is an error retrieving user details or processing loan information.
+     * @see User
+     * @see Loan
+     * @see LoanDTO
+     * @see LoanResponseDTO
+     */
     public LoanResponseDTO getLoanDetailsByUserName (String username){
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");

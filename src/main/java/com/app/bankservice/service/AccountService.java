@@ -26,7 +26,23 @@ public class AccountService {
     }
 
 
-
+    /**
+     * Retrieves account details for a given username.
+     * <p>
+     * This method fetches the {@link User} by the specified username and retrieves all associated accounts. It processes the accounts to create a list of {@link AccountDTO} objects and includes the details of the first {@link BankCard} associated with each account. If any errors occur during the retrieval or processing of data, appropriate exceptions are thrown.
+     * </p>
+     *
+     * @param username The username of the user whose account details are to be retrieved. This cannot be null or empty.
+     * @return An {@link AccountResponseDTO} object containing the user's first name, last name, and a list of {@link AccountDTO} objects with account details.
+     * @throws IllegalArgumentException if the username is null, empty, or if no user is found for the given username, or if no accounts are associated with the user.
+     * @throws RuntimeException if there is an error retrieving user details or processing account information.
+     * @see User
+     * @see Account
+     * @see AccountDTO
+     * @see BankCard
+     * @see BankCardDTO
+     * @see AccountResponseDTO
+     */
     public AccountResponseDTO getAccountDetailsByUsername(String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
