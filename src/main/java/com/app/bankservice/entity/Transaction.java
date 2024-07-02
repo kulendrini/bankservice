@@ -14,18 +14,18 @@ public class Transaction {
     private Long transactionId;
     private Double amount;
     private String description;
+    private String destinationAccountNo;
+    private String bank;
     @Temporal(TemporalType.TIMESTAMP)
     private Date transactionDate;
 
-    public Transaction() {
-    }
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 
-    public Transaction(Long transactionId, Double amount, String description, Date transactionDate) {
-        this.transactionId = transactionId;
-        this.amount = amount;
-        this.description = description;
-        this.transactionDate = transactionDate;
-    }
+    @ManyToOne
+    @JoinColumn(name = "transaction_type_id")
+    private TransactionType transactionType;
 
     public Long getTransactionId() {
         return transactionId;
@@ -59,26 +59,35 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "transactionId=" + transactionId +
-                ", amount=" + amount +
-                ", description='" + description + '\'' +
-                ", transactionDate=" + transactionDate +
-                '}';
+    public Account getAccount() {
+        return account;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Transaction that = (Transaction) o;
-        return Objects.equals(transactionId, that.transactionId) && Objects.equals(amount, that.amount) && Objects.equals(description, that.description) && Objects.equals(transactionDate, that.transactionDate);
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(transactionId, amount, description, transactionDate);
+    public TransactionType getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(TransactionType transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    public String getDestinationAccountNo() {
+        return destinationAccountNo;
+    }
+
+    public void setDestinationAccountNo(String destinationAccountNo) {
+        this.destinationAccountNo = destinationAccountNo;
+    }
+
+    public String getBank() {
+        return bank;
+    }
+
+    public void setBank(String bank) {
+        this.bank = bank;
     }
 }

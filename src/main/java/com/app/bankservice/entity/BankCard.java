@@ -19,15 +19,24 @@ public class BankCard {
     @Temporal(TemporalType.DATE)
     private Date expiryDate;
 
+    @ManyToOne
+    @JoinColumn(name = "card_type_id")
+    private CardType cardType;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
     public BankCard() {
     }
 
-    public BankCard(Long cardID, String cardNumber, Double creditLimit, String status, Date expiryDate) {
+    public BankCard(Long cardID, String cardNumber, Double creditLimit, String status, Date expiryDate, CardType cardType) {
         this.cardID = cardID;
         this.cardNumber = cardNumber;
         this.creditLimit = creditLimit;
         this.status = status;
         this.expiryDate = expiryDate;
+        this.cardType = cardType;
     }
 
     public Long getCardID() {
@@ -70,6 +79,14 @@ public class BankCard {
         this.expiryDate = expiryDate;
     }
 
+    public CardType getCardType() {
+        return cardType;
+    }
+
+    public void setCardType(CardType cardType) {
+        this.cardType = cardType;
+    }
+
     @Override
     public String toString() {
         return "BankCard{" +
@@ -78,6 +95,7 @@ public class BankCard {
                 ", creditLimit=" + creditLimit +
                 ", status='" + status + '\'' +
                 ", expiryDate=" + expiryDate +
+                ", cardType=" + cardType +
                 '}';
     }
 
@@ -86,11 +104,11 @@ public class BankCard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BankCard bankCard = (BankCard) o;
-        return Objects.equals(cardID, bankCard.cardID) && Objects.equals(cardNumber, bankCard.cardNumber) && Objects.equals(creditLimit, bankCard.creditLimit) && Objects.equals(status, bankCard.status) && Objects.equals(expiryDate, bankCard.expiryDate);
+        return Objects.equals(cardID, bankCard.cardID) && Objects.equals(cardNumber, bankCard.cardNumber) && Objects.equals(creditLimit, bankCard.creditLimit) && Objects.equals(status, bankCard.status) && Objects.equals(expiryDate, bankCard.expiryDate) && Objects.equals(cardType, bankCard.cardType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardID, cardNumber, creditLimit, status, expiryDate);
+        return Objects.hash(cardID, cardNumber, creditLimit, status, expiryDate, cardType);
     }
 }
