@@ -25,6 +25,24 @@ public class LoanController {
         this.loanService = loanService;
     }
 
+
+    /**
+     * Retrieves loan details for a specific user identified by their username.
+     *
+     * This endpoint fetches the loan details for the user specified by the {@code username} path variable. It returns a {@link LoanResponseDTO} containing information about the user's loans, including loan amounts, interest rates, durations, and types.
+     * If the username is invalid or if there are any issues during the retrieval process, appropriate error responses are returned.
+     *
+     * @param username the username of the user whose loan details are to be retrieved
+     * @return a {@link ResponseEntity} containing a {@link LoanResponseDTO} with the user's loan details if the request is successful, or an appropriate HTTP error response:
+     *         <ul>
+     *             <li>200 OK: The loan details were successfully retrieved and are included in the response body</li>
+     *             <li>400 Bad Request: The username provided is invalid or not found</li>
+     *             <li>500 Internal Server Error: An unexpected server error occurred during the processing of the request</li>
+     *         </ul>
+     * @throws IllegalArgumentException if the username is invalid or if the loan details cannot be found
+     * @throws RuntimeException for unexpected server errors
+     * @throws Exception for any other unforeseen exceptions
+     */
     @GetMapping("/loan/{username}")
     public ResponseEntity<LoanResponseDTO> getLoan(@PathVariable("username") String username) {
         try {

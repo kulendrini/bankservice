@@ -27,6 +27,26 @@ public class AccountController {
     }
 
 
+
+    /**
+     * Retrieves account details for a specified username.
+     *
+     * This endpoint fetches account details based on the provided username. It uses the `AccountService` to retrieve the account information and returns it in the `AccountResponseDTO` format.
+     * If the username does not exist or if there is a problem with the service layer, appropriate HTTP status codes are returned.
+     *
+     * @param username the username of the account holder for which the details are to be fetched
+     *                 (must be a valid, non-null string)
+     * @return a {@link ResponseEntity} containing the {@link AccountResponseDTO} with account details if successful;
+     *         or an appropriate HTTP status code if an error occurs:
+     *         <ul>
+     *             <li>400 Bad Request if the username is invalid or not found</li>
+     *             <li>500 Internal Server Error if there is an unexpected error during processing</li>
+     *         </ul>
+     * @throws IllegalArgumentException if the username is invalid or not found in the database
+     * @throws RuntimeException if an unexpected error occurs while retrieving account details
+     * @see AccountService#getAccountDetailsByUsername(String)
+     * @see AccountResponseDTO
+     */
     @GetMapping("/account/{username}")
     public ResponseEntity<AccountResponseDTO> getAccounts(@PathVariable("username") String username) {
         try {
@@ -41,6 +61,29 @@ public class AccountController {
     }
 
 
+
+    /**
+     * Retrieves transaction details for a specified account number.
+     *
+     * This endpoint fetches a list of transactions for the given account number within the specified range of transaction IDs.
+     * It uses the `TransactionService` to retrieve the transaction details and returns them in the `TransactionResponseDTO` format.
+     * If the account number is invalid, the `from` or `to` parameters are incorrect, or if there is an error during processing, appropriate HTTP status codes are returned.
+     *
+     * @param accountNumber the account number for which transactions are to be fetched
+     *                      (must be a valid, non-null string representing the account number)
+     * @param from  the starting transaction ID for the range (defaults to 0 if not provided)
+     * @param to    the ending transaction ID for the range (defaults to 10 if not provided)
+     * @return a {@link ResponseEntity} containing the {@link TransactionResponseDTO} with transaction details if successful;
+     *         or an appropriate HTTP status code if an error occurs:
+     *         <ul>
+     *             <li>400 Bad Request if the account number is invalid or if the `from` or `to` parameters are incorrect</li>
+     *             <li>500 Internal Server Error if there is an unexpected error during processing</li>
+     *         </ul>
+     * @throws IllegalArgumentException if the account number is invalid or if the `from` or `to` parameters are out of bounds
+     * @throws RuntimeException if an unexpected error occurs while retrieving transaction details
+     * @see TransactionService#getTransactionDetailsByAccountNo(String, int, int)
+     * @see TransactionResponseDTO
+     */
     @GetMapping("/account/{accountNumber}/transactions")
     public ResponseEntity<TransactionResponseDTO> getAccountTransactions(
             @PathVariable("accountNumber") String accountNumber,

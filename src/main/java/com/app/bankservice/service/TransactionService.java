@@ -39,7 +39,23 @@ public class TransactionService {
     }
 
 
-
+    /**
+     * Retrieves transaction details for a given account number within a specified range.
+     * <p>
+     * This method fetches the {@link Account} by the specified account number and retrieves all associated transactions within the provided range. It processes the transactions to create a list of {@link TransactionDTO} objects. It also includes account details such as balance, status, and type in the response. If any errors occur during the retrieval or processing of data, appropriate exceptions are thrown.
+     * </p>
+     *
+     * @param accountNumber The account number for which transaction details are to be retrieved. This cannot be null or empty.
+     * @param from The starting transaction ID for the range (inclusive).
+     * @param to The ending transaction ID for the range (inclusive).
+     * @return A {@link TransactionResponseDTO} object containing the account details and a list of {@link TransactionDTO} objects with transaction details.
+     * @throws IllegalArgumentException if the account number is null or empty, or if no account is found for the given account number.
+     * @throws RuntimeException if there is an error fetching the account or transactions, or setting transaction response details.
+     * @see Account
+     * @see Transaction
+     * @see TransactionDTO
+     * @see TransactionResponseDTO
+     */
     public TransactionResponseDTO getTransactionDetailsByAccountNo (String accountNumber, int from, int to) {
         if (accountNumber == null || accountNumber.isEmpty()) {
             throw new IllegalArgumentException("Account number cannot be null or empty");
@@ -89,7 +105,19 @@ public class TransactionService {
     }
 
 
-
+    /**
+     * Retrieves the details of a specific transaction by its ID.
+     * <p>
+     * This method fetches the {@link Transaction} from the repository using the provided transaction ID. It then maps the transaction details to a {@link TransactionDetailsDTO} object which includes the transaction's ID, associated account number, description, amount, date, and type. If the transaction ID is null or no transaction is found, appropriate exceptions are thrown.
+     * </p>
+     *
+     * @param transactionId The ID of the transaction to retrieve. This cannot be null.
+     * @return A {@link TransactionDetailsDTO} object containing details of the transaction including transaction ID, account number, description, amount, date, and type.
+     * @throws IllegalArgumentException if the transaction ID is null or if no transaction is found for the given ID.
+     * @throws RuntimeException if there is an error fetching the transaction or setting transaction details.
+     * @see Transaction
+     * @see TransactionDetailsDTO
+     */
     public TransactionDetailsDTO getTransactionById(Long transactionId){
         if (transactionId == null) {
             throw new IllegalArgumentException("Transaction ID cannot be null");
@@ -121,7 +149,19 @@ public class TransactionService {
     }
 
 
-
+    /**
+     * Processes a new transaction based on the provided {@link TransactionInbound} data.
+     * <p>
+     * This method performs the necessary validation on the provided transaction data and then processes the transaction. The transaction is encapsulated in a {@link TransactionOutbound} object, which includes details such as the transaction ID, status, and any related messages. If the provided data is invalid or if an unexpected error occurs during the processing, appropriate exceptions are thrown and logged.
+     * </p>
+     *
+     * @param transactionInbound The data required to create a new transaction. This cannot be null.
+     * @return A {@link TransactionOutbound} object containing the results of the transaction process, including details such as transaction ID and status.
+     * @throws IllegalArgumentException if the {@code transactionInbound} is null or invalid.
+     * @throws RuntimeException if an unexpected error occurs during the transaction processing.
+     * @see TransactionInbound
+     * @see TransactionOutbound
+     */
     @Transactional
     public TransactionOutbound makeTransaction(TransactionInbound transactionInbound) {
         if (transactionInbound == null) {
@@ -138,6 +178,20 @@ public class TransactionService {
         }
     }
 
+
+    /**
+     * Processes a transaction based on the provided {@link TransactionInbound} data.
+     * <p>
+     * This method handles the transaction processing by first saving the transaction, then fetching and refreshing the account details for the origin account, and finally creating a {@link TransactionOutbound} object containing the details of the transaction. It includes error handling for various stages of the process.
+     * </p>
+     *
+     * @param transactionInbound The data required to process the transaction. This cannot be null.
+     * @return A {@link TransactionOutbound} object containing details of the transaction including the sender's account number, beneficiary's account number, and transfer status.
+     * @throws IllegalArgumentException if the origin account number provided in {@code transactionInbound} does not correspond to an existing account.
+     * @throws RuntimeException if an unexpected error occurs during the transaction processing or when fetching account details.
+     * @see TransactionInbound
+     * @see TransactionOutbound
+     */
     private TransactionOutbound processTransaction(TransactionInbound transactionInbound) {
         Transaction savedTransaction;
         try {
@@ -174,6 +228,29 @@ public class TransactionService {
         return transactionOutbound;
     }
 
+
+    /**
+     * Saves a transaction based on the provided {@link TransactionInbound} data.
+     * <p>
+     * This method performs several steps to save a transaction:
+     * <ul>
+     * <li>Fetches the account associated with the origin account number from the repository.</li>
+     * <li>Fetches the transaction type from the repository based on the provided transaction type ID.</li>
+     * <li>Checks if there are sufficient funds in the account for the transaction.</li>
+     * <li>Updates the account balance after deducting the transaction amount.</li>
+     * <li>Creates a new {@link Transaction} entity, sets its properties, and saves it to the repository.</li>
+     * </ul>
+     * <p>
+     * The method includes error handling for each stage of the process and throws exceptions if any issues are encountered.
+     * </p>
+     *
+     * @param transactionInbound The data required to create and save a new transaction. This cannot be null.
+     * @return The saved {@link Transaction} entity.
+     * @throws IllegalArgumentException if the origin account number or transaction type ID is invalid, or if there are insufficient funds for the transaction.
+     * @throws RuntimeException if there is an error fetching the account or transaction type, updating the account balance, or saving the transaction.
+     * @see TransactionInbound
+     * @see Transaction
+     */
     private Transaction saveTransaction(TransactionInbound transactionInbound) {
         Account account;
         try {
