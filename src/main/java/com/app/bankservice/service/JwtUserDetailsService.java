@@ -3,6 +3,7 @@ package com.app.bankservice.service;
 import com.app.bankservice.entity.Role;
 import com.app.bankservice.entity.User;
 import com.app.bankservice.model.UserDTO;
+import com.app.bankservice.model.UserResponseDTO;
 import com.app.bankservice.repository.RoleRepository;
 import com.app.bankservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,11 @@ public class JwtUserDetailsService implements UserDetailsService {
         User newUser = new User();
         newUser.setUsername(userDTO.getUsername());
         newUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        newUser.setFirstName(userDTO.getFirstName());
+        newUser.setLastName(userDTO.getLastName());
+        newUser.setContactNo(userDTO.getContactNo());
+        newUser.setEmail(userDTO.getEmail());
+        newUser.setAddress(userDTO.getAddress());
         Set<Role> roles = new HashSet<>();
         for (String roleName : userDTO.getRoles()) {
             Role role = roleRepository.findByName(roleName);
@@ -56,4 +62,10 @@ public class JwtUserDetailsService implements UserDetailsService {
         newUser.setRoles(roles);
         return userRepository.save(newUser);
     }
+
+    public UserResponseDTO getUserByName (String username) {
+       User user = userRepository.findByUsername(username);
+        return UserResponseDTO.fromUser(user);
+    }
+
 }

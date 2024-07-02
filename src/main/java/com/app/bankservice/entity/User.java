@@ -16,12 +16,20 @@ public class User {
     private Long id;
     @Column(unique = true)
     private String username;
+    private String firstName;
+    private String lastName;
     private String password;
     private String contactNo;
     private String email;
     private String address;
+
     @Temporal(TemporalType.TIMESTAMP)
-    private Date registrationDate;
+    @Column(name = "created_date", nullable = false, updatable = false)
+    private Date createdDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_date", nullable = false)
+    private Date updatedDate;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_role",
@@ -43,21 +51,15 @@ public class User {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<Loan> loans;
 
-    public User() {
+    @PrePersist
+    protected void onCreate() {
+        createdDate = new Date();
+        updatedDate = new Date();
     }
 
-    public User(Long id, String username, String password, String contactNo, String email, String address, Date registrationDate, Set<Role> roles, Set<Account> accounts, List<BankCard> bankCards, List<Loan> loans) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.contactNo = contactNo;
-        this.email = email;
-        this.address = address;
-        this.registrationDate = registrationDate;
-        this.roles = roles;
-        this.accounts = accounts;
-        this.bankCards = bankCards;
-        this.loans = loans;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedDate = new Date();
     }
 
     public Long getId() {
@@ -74,6 +76,22 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPassword() {
@@ -108,12 +126,20 @@ public class User {
         this.address = address;
     }
 
-    public Date getRegistrationDate() {
-        return registrationDate;
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
-    public void setRegistrationDate(Date registrationDate) {
-        this.registrationDate = registrationDate;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Date getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(Date updatedDate) {
+        this.updatedDate = updatedDate;
     }
 
     public Set<Role> getRoles() {
@@ -151,15 +177,18 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "accounts=" + accounts +
+                ", id=" + id +
                 ", username='" + username + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", password='" + password + '\'' +
                 ", contactNo='" + contactNo + '\'' +
                 ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
-                ", registrationDate=" + registrationDate +
+                ", createdDate=" + createdDate +
+                ", updatedDate=" + updatedDate +
                 ", roles=" + roles +
-                ", accounts=" + accounts +
                 ", bankCards=" + bankCards +
                 ", loans=" + loans +
                 '}';
@@ -170,11 +199,11 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(contactNo, user.contactNo) && Objects.equals(email, user.email) && Objects.equals(address, user.address) && Objects.equals(registrationDate, user.registrationDate) && Objects.equals(roles, user.roles) && Objects.equals(accounts, user.accounts) && Objects.equals(bankCards, user.bankCards) && Objects.equals(loans, user.loans);
+        return Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(password, user.password) && Objects.equals(contactNo, user.contactNo) && Objects.equals(email, user.email) && Objects.equals(address, user.address) && Objects.equals(createdDate, user.createdDate) && Objects.equals(updatedDate, user.updatedDate) && Objects.equals(roles, user.roles) && Objects.equals(accounts, user.accounts) && Objects.equals(bankCards, user.bankCards) && Objects.equals(loans, user.loans);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, contactNo, email, address, registrationDate, roles, accounts, bankCards, loans);
+        return Objects.hash(id, username, firstName, lastName, password, contactNo, email, address, createdDate, updatedDate, roles, accounts, bankCards, loans);
     }
 }
