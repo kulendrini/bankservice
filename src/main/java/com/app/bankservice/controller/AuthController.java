@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("v1/dbservice/app")
 @CrossOrigin
 public class AuthController {
 
@@ -45,6 +46,12 @@ public class AuthController {
     public ResponseEntity<?> saveUser(@RequestBody UserDTO user) throws Exception {
         User savedUser = userDetailsService.save(user);
         UserResponseDTO responseDTO = UserResponseDTO.fromUser(savedUser);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<UserResponseDTO> getByUserName(@PathVariable("username") String username ) throws Exception {
+        UserResponseDTO responseDTO = userDetailsService.getUserByName(username);
         return ResponseEntity.ok(responseDTO);
     }
 
