@@ -10,6 +10,7 @@ import com.app.bankservice.repository.TransactionTypeRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class TransactionService {
      * @see TransactionDTO
      * @see TransactionResponseDTO
      */
-    public TransactionResponseDTO getTransactionDetailsByAccountNo (String accountNumber, int from, int to) {
+    public TransactionResponseDTO getTransactionDetailsByAccountNo (@NotEmpty(message = "Account number cannot be empty") String accountNumber, int from, int to) {
         if (accountNumber == null || accountNumber.isEmpty()) {
             throw new IllegalArgumentException("Account number cannot be null or empty");
         }

@@ -1,11 +1,14 @@
 package com.app.bankservice.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class LoanResponseDTO {
 
     private String firstName;
     private String lastName;
+    @JsonProperty("loans")
     private List<LoanDTO> loans;
 
     public String getFirstName() {

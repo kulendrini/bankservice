@@ -6,16 +6,18 @@ import com.app.bankservice.entity.User;
 import com.app.bankservice.model.AccountDTO;
 import com.app.bankservice.model.AccountResponseDTO;
 import com.app.bankservice.model.BankCardDTO;
-import com.app.bankservice.repository.AccountRepository;
 import com.app.bankservice.repository.UserRepository;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Service
+@Validated
 public class AccountService {
 
     private final UserRepository userRepository;
@@ -43,7 +45,7 @@ public class AccountService {
      * @see BankCardDTO
      * @see AccountResponseDTO
      */
-    public AccountResponseDTO getAccountDetailsByUsername(String username) {
+    public AccountResponseDTO getAccountDetailsByUsername(@NotEmpty(message = "Username cannot be empty") String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }

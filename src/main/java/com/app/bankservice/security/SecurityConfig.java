@@ -47,7 +47,7 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/v1/dbservice/app/authenticate", "/v1/dbservice/app/register").permitAll()
+                        .requestMatchers("/v1/dbservice/app/authenticate", "/v1/dbservice/app/register", "/v1/dbservice/app/healthCheck").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
