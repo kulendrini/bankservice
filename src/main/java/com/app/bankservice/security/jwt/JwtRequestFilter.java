@@ -1,9 +1,6 @@
 package com.app.bankservice.security.jwt;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,29 +40,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
-            try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-            } catch (IllegalArgumentException e) {
-                logger.error("Unable to get JWT Token", e);
-            } catch (ExpiredJwtException e) {
-                logger.error("JWT Token has expired", e);
-                setErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, response, "JWT Token has expired");
-                return;
-            } catch (MalformedJwtException e) {
-                logger.error("Invalid JWT Token", e);
-                setErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, response, "Invalid JWT Token");
-                return;
-            } catch (SignatureException e) {
-                logger.error("JWT Signature does not match", e);
-                setErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, response, "JWT Signature does not match");
-                return;
-            } catch (UnsupportedJwtException e) {
-                logger.error("JWT Token is unsupported", e);
-                setErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, response, "JWT Token is unsupported");
-                return;
-            }
+            username = jwtTokenUtil.getUsernameFromToken(jwtToken);
         } else {
-            logger.warn("JWT Token does not begin with Bearer String");
+            throw new UnsupportedJwtException("JWT Token does not begin with Bearer String");
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
