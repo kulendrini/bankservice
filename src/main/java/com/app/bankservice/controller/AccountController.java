@@ -4,15 +4,18 @@ import com.app.bankservice.model.AccountResponseDTO;
 import com.app.bankservice.model.TransactionResponseDTO;
 import com.app.bankservice.service.AccountService;
 import com.app.bankservice.service.TransactionService;
+import jakarta.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("v1/dbservice/app")
+@Validated
 public class AccountController {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
@@ -25,7 +28,6 @@ public class AccountController {
         this.accountService = accountService;
         this.transactionService = transactionService;
     }
-
 
 
     /**
@@ -48,10 +50,10 @@ public class AccountController {
      * @see AccountResponseDTO
      */
     @GetMapping("/account/{username}")
-    public ResponseEntity<AccountResponseDTO> getAccounts(@PathVariable("username") String username) {
+    public ResponseEntity<AccountResponseDTO> getAccounts(@PathVariable("username") @NotEmpty(message = "Username cannot be empty") String username) {
         try {
             AccountResponseDTO accountResponseDTO = accountService.getAccountDetailsByUsername(username);
-            return ResponseEntity.ok(accountResponseDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(accountResponseDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (RuntimeException e) {
@@ -59,8 +61,6 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
-
 
     /**
      * Retrieves transaction details for a specified account number.
@@ -86,12 +86,12 @@ public class AccountController {
      */
     @GetMapping("/account/{accountNumber}/transactions")
     public ResponseEntity<TransactionResponseDTO> getAccountTransactions(
-            @PathVariable("accountNumber") String accountNumber,
+            @PathVariable("accountNumber") @NotEmpty(message = "Account number cannot be empty") String accountNumber,
             @RequestParam(value = "from", defaultValue = "0") int from,
             @RequestParam(value = "to", defaultValue = "10") int to) {
         try {
             TransactionResponseDTO transactions = transactionService.getTransactionDetailsByAccountNo(accountNumber, from, to);
-            return ResponseEntity.ok(transactions);
+            return ResponseEntity.status(HttpStatus.OK).body(transactions);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (RuntimeException e) {

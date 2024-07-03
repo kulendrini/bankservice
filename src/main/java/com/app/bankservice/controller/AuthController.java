@@ -7,19 +7,28 @@ import com.app.bankservice.model.UserDTO;
 import com.app.bankservice.model.UserResponseDTO;
 import com.app.bankservice.security.jwt.JwtTokenUtil;
 import com.app.bankservice.service.JwtUserDetailsService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("v1/dbservice/app")
+@Validated
 @CrossOrigin
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -48,7 +57,7 @@ public class AuthController {
      * @throws Exception if an error occurs during authentication
      */
     @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid JwtRequest authenticationRequest) throws Exception {
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
@@ -73,13 +82,18 @@ public class AuthController {
      *             <li>400 Bad Request: The request body is invalid or incomplete</li>
      *             <li>500 Internal Server Error: An unexpected server error occurred during the user registration process</li>
      *         </ul>
-     * @throws Exception if an error occurs during the user registration process
      */
     @PostMapping("/register")
-    public ResponseEntity<?> saveUser(@RequestBody UserDTO user) throws Exception {
+    public ResponseEntity<?> saveUser(@RequestBody @Valid UserDTO user) {
+        try{
         User savedUser = userDetailsService.save(user);
         UserResponseDTO responseDTO = UserResponseDTO.fromUser(savedUser);
-        return ResponseEntity.ok(responseDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 
@@ -96,12 +110,22 @@ public class AuthController {
      *             <li>400 Bad Request: The request is invalid or the username does not exist</li>
      *             <li>500 Internal Server Error: An unexpected server error occurred while retrieving the user's details</li>
      *         </ul>
-     * @throws Exception if an error occurs while retrieving the user's details
      */
     @GetMapping("/user/{username}")
-    public ResponseEntity<UserResponseDTO> getByUserName(@PathVariable("username") String username ) throws Exception {
+    public ResponseEntity<UserResponseDTO> getByUserName(@PathVariable("username") @NotEmpty(message = "Username cannot be empty") String username ) {
+        try {
         UserResponseDTO responseDTO = userDetailsService.getUserByName(username);
-        return ResponseEntity.ok(responseDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Client error: " + e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (RuntimeException e) {
+            logger.error("Unexpected server error: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
+            logger.error("Unexpected error: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 

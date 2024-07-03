@@ -1,16 +1,22 @@
 package com.app.bankservice.controller;
 
+import com.app.bankservice.model.TransactionDetailsDTO;
+import com.app.bankservice.model.TransactionInbound;
+import com.app.bankservice.model.TransactionOutbound;
+import com.app.bankservice.service.TransactionService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.app.bankservice.model.*;
-import com.app.bankservice.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("v1/dbservice/app")
+@Validated
 public class TransactionController {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionController.class);
@@ -42,10 +48,10 @@ public class TransactionController {
      * @throws RuntimeException for unexpected server errors
      */
     @PostMapping("/transaction")
-    public ResponseEntity<TransactionOutbound> makeTransaction(@RequestBody TransactionInbound transactionInbound) {
+    public ResponseEntity<TransactionOutbound> makeTransaction(@Valid @RequestBody TransactionInbound transactionInbound) {
         try {
             TransactionOutbound transactionOutbound = transactionService.makeTransaction(transactionInbound);
-            return ResponseEntity.ok(transactionOutbound);
+            return ResponseEntity.status(HttpStatus.OK).body(transactionOutbound);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
         } catch (RuntimeException e) {
@@ -73,7 +79,7 @@ public class TransactionController {
      * @throws RuntimeException for unexpected server errors
      */
     @GetMapping("/transaction/{transactionId}")
-    public ResponseEntity<TransactionDetailsDTO> getTransactionById(@PathVariable("transactionId") Long transactionId) {
+    public ResponseEntity<TransactionDetailsDTO> getTransactionById(@PathVariable("transactionId") @NotNull Long transactionId) {
         try {
             TransactionDetailsDTO transactionDetails = transactionService.getTransactionById(transactionId);
             return ResponseEntity.ok(transactionDetails);

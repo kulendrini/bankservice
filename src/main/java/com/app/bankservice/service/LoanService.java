@@ -4,15 +4,12 @@ import com.app.bankservice.entity.Loan;
 import com.app.bankservice.entity.User;
 import com.app.bankservice.model.LoanDTO;
 import com.app.bankservice.model.LoanResponseDTO;
-import com.app.bankservice.repository.LoanPaymentTypeRepository;
-import com.app.bankservice.repository.LoanRepository;
-import com.app.bankservice.repository.LoanTypeRepository;
 import com.app.bankservice.repository.UserRepository;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -41,7 +38,7 @@ public class LoanService {
      * @see LoanDTO
      * @see LoanResponseDTO
      */
-    public LoanResponseDTO getLoanDetailsByUserName (String username){
+    public LoanResponseDTO getLoanDetailsByUserName(@NotEmpty(message = "Username cannot be empty") String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
