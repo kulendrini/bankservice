@@ -75,7 +75,7 @@ public class JwtUserDetailsService implements UserDetailsService {
      * @param userDTO The data required to create a new user. This cannot be null and must contain valid user details.
      * @return The newly created {@link User} entity.
      * @throws IllegalArgumentException if the {@link UserDTO} object is null or contains invalid data (e.g., missing required fields).
-     * @throws RuntimeException if there is an error saving the user or creating roles.
+     * @throws RuntimeException         if there is an error saving the user or creating roles.
      * @see UserDTO
      * @see User
      * @see Role
@@ -110,18 +110,17 @@ public class JwtUserDetailsService implements UserDetailsService {
      * This method fetches a {@link User} entity from the repository using the specified username
      * and then converts it to a {@link UserResponseDTO} using the {@link UserResponseDTO#fromUser(User)} method.
      * If the user is not found, it will return a {@code null} response.
-     * </p>
      *
      * @param username The username of the user whose details are to be retrieved. This cannot be null or empty.
      * @return A {@link UserResponseDTO} containing the user's details, or {@code null} if the user is not found.
      * @throws IllegalArgumentException if the provided username is null or empty.
-     * @throws RuntimeException if there is an error retrieving the user from the repository.
+     * @throws RuntimeException         if there is an error retrieving the user from the repository.
      * @see User
      * @see UserResponseDTO
      * @see UserResponseDTO#fromUser(User)
      */
-    public UserResponseDTO getUserByName (String username) {
-       User user = userRepository.findByUsername(username);
+    public UserResponseDTO getUserByName(String username) {
+        User user = userRepository.findByUsername(username);
         return UserResponseDTO.fromUser(user);
     }
 

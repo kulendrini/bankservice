@@ -25,9 +25,9 @@ public class LoanService {
 
     /**
      * Retrieves loan details for a given username.
-     * <p>
+     *
      * This method fetches the {@link User} by the specified username and retrieves all associated loans. It processes the loans to create a list of {@link LoanDTO} objects. If the username is null, empty, or if no user or loans are found, appropriate exceptions are thrown.
-     * </p>
+     *
      *
      * @param username The username of the user whose loan details are to be retrieved. This cannot be null or empty.
      * @return A {@link LoanResponseDTO} object containing the user's first name, last name, and a list of {@link LoanDTO} objects with loan details.

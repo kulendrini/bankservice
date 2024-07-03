@@ -29,38 +29,21 @@ public class LoanController {
     }
 
     /**
-     * Retrieves loan details for a specific user identified by their username.
+     * Retrieves loan details for a specified username.
      *
-     * This endpoint fetches the loan details for the user specified by the {@code username} path variable. It returns a {@link LoanResponseDTO} containing information about the user's loans, including loan amounts, interest rates, durations, and types.
-     * If the username is invalid or if there are any issues during the retrieval process, appropriate error responses are returned.
+     * This endpoint fetches the loan details associated with the provided username. The username must not be empty;
+     * otherwise, a validation error will be triggered.
      *
-     * @param username the username of the user whose loan details are to be retrieved
-     * @return a {@link ResponseEntity} containing a {@link LoanResponseDTO} with the user's loan details if the request is successful, or an appropriate HTTP error response:
-     *         <ul>
-     *             <li>200 OK: The loan details were successfully retrieved and are included in the response body</li>
-     *             <li>400 Bad Request: The username provided is invalid or not found</li>
-     *             <li>500 Internal Server Error: An unexpected server error occurred during the processing of the request</li>
-     *         </ul>
-     * @throws IllegalArgumentException if the username is invalid or if the loan details cannot be found
-     * @throws RuntimeException for unexpected server errors
-     * @throws Exception for any other unforeseen exceptions
+     * @param username The username of the user for whom loan details are to be fetched. Must not be empty.
+     * @return A {@link ResponseEntity} containing a {@link LoanResponseDTO} with the loan details and an HTTP status
+     *         of {@code 200 OK} if the loan details are successfully retrieved.
+     *
+     * @throws IllegalArgumentException if the username is empty.
      */
     @GetMapping("/loan/{username}")
     public ResponseEntity<?> getLoanDetails(@PathVariable("username") @NotEmpty(message = "Username cannot be empty") String username) {
-
-        try {
-            LoanResponseDTO loanResponseDTO = loanService.getLoanDetailsByUserName(username);
-            return ResponseEntity.status(HttpStatus.OK).body(loanResponseDTO);
-        } catch (IllegalArgumentException e) {
-            logger.warn("Client error: " + e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (RuntimeException e) {
-            logger.error("Unexpected server error: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } catch (Exception e) {
-            logger.error("Unexpected error: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        LoanResponseDTO loanResponseDTO = loanService.getLoanDetailsByUserName(username);
+        return ResponseEntity.status(HttpStatus.OK).body(loanResponseDTO);
     }
 
 }

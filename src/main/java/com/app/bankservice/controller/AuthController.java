@@ -16,10 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,114 +41,82 @@ public class AuthController {
 
 
     /**
-     * Authenticates the user and generates a JWT token.
+     * Authenticates the user and generates a JSON Web Token (JWT) for the authenticated user.
      *
-     * This endpoint takes a {@link JwtRequest} object containing the username and password, authenticates the user,
-     * generates a JWT token if the authentication is successful, and returns a {@link JwtResponse} object containing
-     * the token and its expiration time in seconds.
+     * This endpoint processes the authentication request by validating the provided username and password.
+     * Upon successful authentication, it generates a JWT token for the user and returns it along with the
+     * token's expiration time in seconds.
      *
-     * @param authenticationRequest the authentication request containing the username and password
-     * @return a {@link ResponseEntity} containing a {@link JwtResponse} with the JWT token and its expiration time if the request is successful:
-     *         <ul>
-     *             <li>200 OK: The authentication is successful, and the JWT token is included in the response body</li>
-     *             <li>401 Unauthorized: The authentication fails due to invalid credentials</li>
-     *             <li>500 Internal Server Error: An unexpected server error occurred during authentication</li>
-     *         </ul>
-     * @throws Exception if an error occurs during authentication
+     * @param authenticationRequest The request object containing the username and password for authentication.
+     *                               Must be a valid {@link JwtRequest} object with non-empty username and password.
+     * @return A {@link ResponseEntity} containing a {@link JwtResponse} with the generated JWT token and its
+     *         expiration time in seconds, along with an HTTP status of {@code 200 OK} if the authentication is successful.
+     *
+     * @throws BadCredentialsException if the authentication fails due to incorrect username or password.
      */
     @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid JwtRequest authenticationRequest) throws Exception {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid JwtRequest authenticationRequest) {
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-
         final String token = jwtTokenUtil.generateToken(userDetails);
         final long expiresIn = jwtTokenUtil.getExpirationDateFromToken(token).getTime() - System.currentTimeMillis();
-
         return ResponseEntity.ok(new JwtResponse(token, expiresIn / 1000)); // expiresIn in seconds
     }
 
 
     /**
-     * Registers a new user.
+     * Registers a new user by saving their details.
      *
-     * This endpoint takes a {@link UserDTO} object containing the user details, saves the user to the database,
-     * and returns a {@link UserResponseDTO} object with the saved user's details.
+     * This endpoint processes the user registration request by accepting a {@link UserDTO} object with user details.
+     * Upon successful registration, it saves the user information and returns a {@link UserResponseDTO} object
+     * representing the newly created user along with an HTTP status of {@code 201 Created}.
      *
-     * @param user the user details to be registered, provided as a {@link UserDTO} object
-     * @return a {@link ResponseEntity} containing a {@link UserResponseDTO} with the details of the registered user:
-     *         <ul>
-     *             <li>200 OK: The user was successfully registered, and the user's details are included in the response body</li>
-     *             <li>400 Bad Request: The request body is invalid or incomplete</li>
-     *             <li>500 Internal Server Error: An unexpected server error occurred during the user registration process</li>
-     *         </ul>
+     * @param user The user details to be registered. Must be a valid {@link UserDTO} object with non-null fields.
+     * @return A {@link ResponseEntity} containing a {@link UserResponseDTO} with the details of the newly registered user
+     *         and an HTTP status of {@code 201 Created} if the user is successfully registered.
+     *
+     * @throws MethodArgumentNotValidException if the {@link UserDTO} object contains invalid data.
      */
     @PostMapping("/register")
     public ResponseEntity<?> saveUser(@RequestBody @Valid UserDTO user) {
-        try{
         User savedUser = userDetailsService.save(user);
         UserResponseDTO responseDTO = UserResponseDTO.fromUser(savedUser);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
 
     /**
-     * Retrieves user details by username.
+     * Retrieves the user details for a specified username.
      *
-     * This endpoint takes a username as a path variable, retrieves the user's details from the database,
-     * and returns them in a {@link UserResponseDTO} object.
+     * This endpoint fetches the details of the user associated with the provided username. The username must not be empty;
+     * otherwise, a validation error will be triggered.
      *
-     * @param username the username of the user whose details are to be retrieved
-     * @return a {@link ResponseEntity} containing a {@link UserResponseDTO} with the details of the requested user:
-     *         <ul>
-     *             <li>200 OK: The user's details were successfully retrieved and are included in the response body</li>
-     *             <li>400 Bad Request: The request is invalid or the username does not exist</li>
-     *             <li>500 Internal Server Error: An unexpected server error occurred while retrieving the user's details</li>
-     *         </ul>
+     * @param username The username of the user whose details are to be retrieved. Must not be empty.
+     * @return A {@link ResponseEntity} containing a {@link UserResponseDTO} with the user details and an HTTP status
+     *         of {@code 200 OK} if the user details are successfully retrieved.
+     *
+     * @throws IllegalArgumentException if the username is empty.
      */
     @GetMapping("/user/{username}")
-    public ResponseEntity<UserResponseDTO> getByUserName(@PathVariable("username") @NotEmpty(message = "Username cannot be empty") String username ) {
-        try {
+    public ResponseEntity<UserResponseDTO> getByUserName(@PathVariable("username") @NotEmpty(message = "Username cannot be empty") String username) {
         UserResponseDTO responseDTO = userDetailsService.getUserByName(username);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-        } catch (IllegalArgumentException e) {
-            logger.warn("Client error: " + e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (RuntimeException e) {
-            logger.error("Unexpected server error: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } catch (Exception e) {
-            logger.error("Unexpected error: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
     }
 
 
     /**
-     * Authenticates a user based on their username and password.
+     * Authenticates the user with the provided username and password.
      *
-     * This method attempts to authenticate the user by creating an {@link UsernamePasswordAuthenticationToken}
-     * with the provided username and password, and passing it to the {@link AuthenticationManager}.
-     * If authentication fails, it throws an {@link Exception} with an appropriate message.
+     * This method uses the {@link AuthenticationManager} to authenticate the user by creating a {@link UsernamePasswordAuthenticationToken}
+     * with the provided credentials and invoking the `authenticate` method on the {@link AuthenticationManager}.
      *
-     * @param username the username of the user trying to authenticate
-     * @param password the password of the user trying to authenticate
-     * @throws Exception if the user is disabled or the credentials are invalid
-     * @throws DisabledException if the user account is disabled
-     * @throws BadCredentialsException if the credentials are invalid
+     * @param username The username of the user to be authenticated. Must not be null or empty.
+     * @param password The password of the user to be authenticated. Must not be null or empty.
+     *
+     * @throws BadCredentialsException if the authentication fails due to incorrect username or password.
+     * @throws IllegalArgumentException if the username or password is null or empty.
      */
-    private void authenticate(String username, String password) throws Exception {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        } catch (DisabledException e) {
-            throw new Exception("USER_DISABLED", e);
-        } catch (BadCredentialsException e) {
-            throw new Exception("INVALID_CREDENTIALS", e);
-        }
+    private void authenticate(String username, String password) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 }
