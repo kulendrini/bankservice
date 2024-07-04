@@ -17,6 +17,9 @@ public class UserResponseDTO {
     private String address;
     private Set<String> roles;
 
+    public UserResponseDTO() {
+    }
+
     public UserResponseDTO(Long id, String username, String firstName, String lastName, String contactNo, String email, String address, Set<String> roles) {
         this.id = id;
         this.username = username;

@@ -174,26 +174,6 @@ public class User {
         this.loans = loans;
     }
 
-//    @Override
-//    public String toString() {
-//        return "User{" +
-//                "accounts=" + accounts +
-//                ", id=" + id +
-//                ", username='" + username + '\'' +
-//                ", firstName='" + firstName + '\'' +
-//                ", lastName='" + lastName + '\'' +
-//                ", password='" + password + '\'' +
-//                ", contactNo='" + contactNo + '\'' +
-//                ", email='" + email + '\'' +
-//                ", address='" + address + '\'' +
-//                ", createdDate=" + createdDate +
-//                ", updatedDate=" + updatedDate +
-//                ", roles=" + roles +
-//                ", bankCards=" + bankCards +
-//                ", loans=" + loans +
-//                '}';
-//    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

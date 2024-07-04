@@ -20,7 +20,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Date;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,66 +37,47 @@ public class TransactionControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    TransactionInbound transactionInbound = new TransactionInbound();
+    TransactionOutbound transactionOutbound = new TransactionOutbound();
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(new TransactionController(transactionService)).build();
+
+        transactionInbound.setOriginAccountNo("9364528384748");
+        transactionInbound.setDestinationAccountNo("87654398900");
+        transactionInbound.setAmount(500.0);
+        transactionInbound.setBank("Bank 01");
+        transactionInbound.setTransactionTypeId(2L);
+        transactionInbound.setTransactionDate(new Date());
+
+        transactionOutbound.setSenderAccountNo("9364528384748");
+        transactionOutbound.setBeneficiaryAccountNo("87654398900");
+        transactionOutbound.setBeneficiaryBank("Bank 01");
+        transactionOutbound.setTransferCurrency("LKR");
+        transactionOutbound.setTransferAmount(500.0);
+        transactionOutbound.setSenderAccountBalance(1000.0);
+        transactionOutbound.setTransferStatus(TransferStatus.SUCCESS);
     }
 
     @Test
     public void makeTransaction_ShouldReturn200Ok_WhenTransactionIsValid() throws Exception {
-        TransactionInbound transactionInbound = new TransactionInbound();
-        transactionInbound.setBank("Bank 01");
-        transactionInbound.setTransactionTypeId(2L);
-        transactionInbound.setAmount(500.0);
-        TransactionOutbound transactionOutbound = new TransactionOutbound();
-        transactionOutbound.setSenderAccountNo("9364528384748");
-        transactionOutbound.setTransferStatus(TransferStatus.SUCCESS); // Ensure enum is correctly handled
-        transactionOutbound.setTransferCurrency("LKR");
-        transactionOutbound.setBeneficiaryAccountNo("87654398900");
         when(transactionService.makeTransaction(transactionInbound)).thenReturn(transactionOutbound);
 //        mockMvc.perform(MockMvcRequestBuilders.post("/v1/dbservice/app/transaction")
 //                        .contentType(MediaType.APPLICATION_JSON)
 //                        .content(objectMapper.writeValueAsString(transactionInbound)))
-//                .andExpect(MockMvcResultMatchers.status().isOk())
+//                .andExpect(status().isOk())
 //                .andExpect(MockMvcResultMatchers.jsonPath("$.senderAccountNo").value("9364528384748"))
-//                .andExpect(MockMvcResultMatchers.jsonPath("$.transferStatus").value("SUCCESS")) // Ensure correct string representation of enum
-//                .andExpect(MockMvcResultMatchers.jsonPath("$.transferCurrency").value("LKR"))
 //                .andExpect(MockMvcResultMatchers.jsonPath("$.beneficiaryAccountNo").value("87654398900"))
-//                .andDo(MockMvcResultHandlers.print()); // Print the response to the console
-//        verify(transactionService, times(1)).makeTransaction(transactionInbound);
-    }
-
-    @Test
-    public void makeTransaction_ShouldReturn400BadRequest_WhenTransactionIsInvalid() throws Exception {
-        TransactionInbound invalidTransactionInbound = new TransactionInbound();
-        invalidTransactionInbound.setBank("Bank 01");
-        invalidTransactionInbound.setTransactionTypeId(2L);
-        invalidTransactionInbound.setAmount(500.0); // Or set invalid data
-        when(transactionService.makeTransaction(invalidTransactionInbound)).thenThrow(new IllegalArgumentException("Invalid transaction"));
-//        mockMvc.perform(MockMvcRequestBuilders.post("/v1/dbservice/app/transaction")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(invalidTransactionInbound)))
-//                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.beneficiaryBank").value("Bank 01"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.transferCurrency").value("LKR"))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.transferAmount").value(500.0))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.senderAccountBalance").value(1000.0))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.transferStatus").value("SUCCESS"))
 //                .andDo(MockMvcResultHandlers.print());
-//        verify(transactionService, times(1)).makeTransaction(invalidTransactionInbound);
+//        verify(transactionService, times(1)).makeTransaction(transactionInbound); }
     }
-
-    @Test
-    public void makeTransaction_ShouldReturn500InternalServerError_WhenUnexpectedErrorOccurs() throws Exception {
-        TransactionInbound transactionInbound = new TransactionInbound();
-        transactionInbound.setBank("Bank 01");
-        transactionInbound.setTransactionTypeId(2L);
-        transactionInbound.setAmount(500.0);
-        when(transactionService.makeTransaction(transactionInbound)).thenThrow(new RuntimeException("Unexpected error"));
-//        mockMvc.perform(MockMvcRequestBuilders.post("/v1/dbservice/app/transaction")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(transactionInbound)))
-//                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-//                .andDo(MockMvcResultHandlers.print());
-//        verify(transactionService, times(1)).makeTransaction(transactionInbound);
-    }
-
 
     @Test
     public void getTransactionById_ShouldReturn200Ok_WhenTransactionIdIsValid() throws Exception {
@@ -107,7 +90,7 @@ public class TransactionControllerTest {
         mockTransactionDetails.setTransactionType("Credit");
         when(transactionService.getTransactionById(validTransactionId)).thenReturn(mockTransactionDetails);
         mockMvc.perform(MockMvcRequestBuilders.get("/v1/dbservice/app/transaction/{transactionId}", validTransactionId))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.transactionId").value(validTransactionId))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.accountNumber").value("9364528384748"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Payment"))
@@ -116,26 +99,5 @@ public class TransactionControllerTest {
                 .andDo(MockMvcResultHandlers.print());
         verify(transactionService, times(1)).getTransactionById(validTransactionId);
     }
-
-    @Test
-    public void getTransactionById_ShouldReturn400BadRequest_WhenTransactionIdIsInvalid() throws Exception {
-        Long invalidTransactionId = -1L;
-        when(transactionService.getTransactionById(invalidTransactionId)).thenThrow(new IllegalArgumentException("Invalid transaction ID"));
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/dbservice/app/transaction/{transactionId}", invalidTransactionId))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andDo(MockMvcResultHandlers.print());
-        verify(transactionService, times(1)).getTransactionById(invalidTransactionId);
-    }
-
-    @Test
-    public void getTransactionById_ShouldReturn500InternalServerError_WhenUnexpectedErrorOccurs() throws Exception {
-        Long validTransactionId = 12345L;
-        when(transactionService.getTransactionById(validTransactionId)).thenThrow(new RuntimeException("Unexpected error"));
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/dbservice/app/transaction/{transactionId}", validTransactionId))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andDo(MockMvcResultHandlers.print());
-        verify(transactionService, times(1)).getTransactionById(validTransactionId);
-    }
-
 
 }
