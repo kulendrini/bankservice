@@ -444,6 +444,3 @@ For production deployment:
 - Add CI/CD pipeline configuration
 - Externalize all secrets and environment-specific properties
 
-## License
-
-This project does not currently specify a license. Add a license file before distributing or publishing the project.
